@@ -132,7 +132,7 @@ const QRScanner = () => {
         <CardTitle className="flex justify-between items-center">
           Attendance Scanner
           <Badge 
-            variant={wifiConnected ? "success" : "destructive"}
+            variant={wifiConnected ? "secondary" : "destructive"}
             className="flex items-center gap-1"
           >
             {wifiConnected ? (
