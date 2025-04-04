@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from "sonner";
 
-export type UserRole = 'student' | 'faculty';
+export type UserRole = 'student' | 'faculty' | 'admin';
 
 export interface User {
   id: string;
@@ -23,6 +23,7 @@ interface AuthContextType {
   verifyDevice: () => Promise<boolean>;
   isAuthenticated: boolean;
   isFaculty: boolean;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -45,6 +46,14 @@ const mockUsers: User[] = [
     department: 'Computer Science',
     deviceId: '',
     verified: false,
+    photoUrl: '/placeholder.svg'
+  },
+  {
+    id: '3',
+    name: 'Admin User',
+    email: 'admin@college.edu',
+    role: 'admin',
+    verified: true,
     photoUrl: '/placeholder.svg'
   }
 ];
@@ -129,7 +138,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         logout,
         verifyDevice,
         isAuthenticated: !!user,
-        isFaculty: user?.role === 'faculty'
+        isFaculty: user?.role === 'faculty',
+        isAdmin: user?.role === 'admin'
       }}
     >
       {children}

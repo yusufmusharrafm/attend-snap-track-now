@@ -17,6 +17,9 @@ import FacultyDashboardPage from "./pages/faculty/FacultyDashboardPage";
 import DepartmentsPage from "./pages/faculty/DepartmentsPage";
 import StudentsPage from "./pages/faculty/StudentsPage";
 import ClassReportsPage from "./pages/faculty/ClassReportsPage";
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import AdminDepartmentsPage from "./pages/admin/DepartmentsPage";
+import AdminStudentsPage from "./pages/admin/StudentsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +47,11 @@ const App = () => (
                 <Route path="/faculty/departments" element={<DepartmentsPage />} />
                 <Route path="/faculty/students" element={<StudentsPage />} />
                 <Route path="/faculty/reports" element={<ClassReportsPage />} />
+                
+                {/* Admin Pages */}
+                <Route path="/admin" element={<AdminDashboardPage />} />
+                <Route path="/admin/departments" element={<AdminDepartmentsPage />} />
+                <Route path="/admin/students" element={<AdminStudentsPage />} />
                 
                 {/* Catch-all route */}
                 <Route path="*" element={<NotFound />} />
