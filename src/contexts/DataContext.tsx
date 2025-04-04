@@ -32,15 +32,31 @@ export interface Subject {
   code: string;
 }
 
+export interface AttendanceRecord {
+  id: string;
+  studentId: string;
+  subjectId: string;
+  date: string;
+  present: boolean;
+}
+
 // Context type
 interface DataContextType {
   departments: Department[];
   students: Student[];
   classes: Class[];
+  subjects: Subject[];
+  attendanceRecords: AttendanceRecord[];
   addDepartment: (department: Omit<Department, 'id'>) => void;
   addStudent: (student: Omit<Student, 'id'>) => void;
   getDepartmentName: (departmentId: string) => string;
   getDepartmentStudents: (departmentId: string) => Student[];
+  getDepartmentSubjects: (departmentId: string) => Subject[];
+  getStudentAttendance: (studentId: string, startDate: string, endDate: string) => AttendanceRecord[];
+  getSubjectAttendance: (subjectId: string) => AttendanceRecord[];
+  getStudentName: (studentId: string) => string;
+  getSubjectName: (subjectId: string) => string;
+  recordAttendance: (studentId: string, subjectId: string, present: boolean) => void;
 }
 
 // Create context
@@ -113,11 +129,48 @@ const initialClasses: Class[] = [
   }
 ];
 
+// Create initial attendance records
+const initialAttendanceRecords: AttendanceRecord[] = [
+  // For student 1
+  { id: 'att1', studentId: 'stud1', subjectId: 'sub1', date: '2025-04-01', present: true },
+  { id: 'att2', studentId: 'stud1', subjectId: 'sub2', date: '2025-04-01', present: true },
+  { id: 'att3', studentId: 'stud1', subjectId: 'sub1', date: '2025-04-02', present: false },
+  { id: 'att4', studentId: 'stud1', subjectId: 'sub2', date: '2025-04-02', present: true },
+  { id: 'att5', studentId: 'stud1', subjectId: 'sub1', date: '2025-04-03', present: true },
+  { id: 'att6', studentId: 'stud1', subjectId: 'sub2', date: '2025-04-03', present: true },
+  { id: 'att7', studentId: 'stud1', subjectId: 'sub1', date: '2025-04-04', present: true },
+  { id: 'att8', studentId: 'stud1', subjectId: 'sub2', date: '2025-04-04', present: false },
+  
+  // For student 2
+  { id: 'att9', studentId: 'stud2', subjectId: 'sub5', date: '2025-04-01', present: true },
+  { id: 'att10', studentId: 'stud2', subjectId: 'sub6', date: '2025-04-01', present: true },
+  { id: 'att11', studentId: 'stud2', subjectId: 'sub5', date: '2025-04-02', present: true },
+  { id: 'att12', studentId: 'stud2', subjectId: 'sub6', date: '2025-04-02', present: true },
+  { id: 'att13', studentId: 'stud2', subjectId: 'sub5', date: '2025-04-03', present: false },
+  { id: 'att14', studentId: 'stud2', subjectId: 'sub6', date: '2025-04-03', present: true },
+  { id: 'att15', studentId: 'stud2', subjectId: 'sub5', date: '2025-04-04', present: true },
+  { id: 'att16', studentId: 'stud2', subjectId: 'sub6', date: '2025-04-04', present: true },
+  
+  // For student 3
+  { id: 'att17', studentId: 'stud3', subjectId: 'sub1', date: '2025-04-01', present: false },
+  { id: 'att18', studentId: 'stud3', subjectId: 'sub2', date: '2025-04-01', present: true },
+  { id: 'att19', studentId: 'stud3', subjectId: 'sub1', date: '2025-04-02', present: true },
+  { id: 'att20', studentId: 'stud3', subjectId: 'sub2', date: '2025-04-02', present: false },
+  { id: 'att21', studentId: 'stud3', subjectId: 'sub1', date: '2025-04-03', present: true },
+  { id: 'att22', studentId: 'stud3', subjectId: 'sub2', date: '2025-04-03', present: true },
+  { id: 'att23', studentId: 'stud3', subjectId: 'sub1', date: '2025-04-04', present: false },
+  { id: 'att24', studentId: 'stud3', subjectId: 'sub2', date: '2025-04-04', present: true },
+];
+
 // Provider component
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [departments, setDepartments] = useState<Department[]>(initialDepartments);
   const [students, setStudents] = useState<Student[]>(initialStudents);
   const [classes, setClasses] = useState<Class[]>(initialClasses);
+  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>(initialAttendanceRecords);
+  
+  // Extract all subjects from classes
+  const subjects = classes.flatMap(cls => cls.subjects);
 
   // Add a new department
   const addDepartment = (department: Omit<Department, 'id'>) => {
@@ -154,15 +207,74 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const getDepartmentStudents = (departmentId: string): Student[] => {
     return students.filter(student => student.departmentId === departmentId);
   };
+  
+  // Helper to get subjects by department ID
+  const getDepartmentSubjects = (departmentId: string): Subject[] => {
+    const departmentClasses = classes.filter(cls => cls.departmentId === departmentId);
+    return departmentClasses.flatMap(cls => cls.subjects);
+  };
+  
+  // Helper to get student attendance records
+  const getStudentAttendance = (studentId: string, startDate: string, endDate: string): AttendanceRecord[] => {
+    return attendanceRecords.filter(record => 
+      record.studentId === studentId && 
+      record.date >= startDate && 
+      record.date <= endDate
+    );
+  };
+  
+  // Helper to get attendance records for a subject
+  const getSubjectAttendance = (subjectId: string): AttendanceRecord[] => {
+    return attendanceRecords.filter(record => record.subjectId === subjectId);
+  };
+  
+  // Helper to get student name by ID
+  const getStudentName = (studentId: string): string => {
+    const student = students.find(s => s.id === studentId);
+    return student ? student.name : 'Unknown Student';
+  };
+  
+  // Helper to get subject name by ID
+  const getSubjectName = (subjectId: string): string => {
+    const subject = subjects.find(s => s.id === subjectId);
+    return subject ? subject.name : 'Unknown Subject';
+  };
+  
+  // Record attendance
+  const recordAttendance = (studentId: string, subjectId: string, present: boolean) => {
+    const today = new Date().toISOString().split('T')[0];
+    const newAttendance = {
+      id: `att${attendanceRecords.length + 1}`,
+      studentId,
+      subjectId,
+      date: today,
+      present
+    };
+    
+    setAttendanceRecords([...attendanceRecords, newAttendance]);
+    
+    const studentName = getStudentName(studentId);
+    const subjectName = getSubjectName(subjectId);
+    
+    toast.success(`Attendance recorded for ${studentName} in ${subjectName}`);
+  };
 
   const contextValue = {
     departments,
     students,
     classes,
+    subjects,
+    attendanceRecords,
     addDepartment,
     addStudent,
     getDepartmentName,
     getDepartmentStudents,
+    getDepartmentSubjects,
+    getStudentAttendance,
+    getSubjectAttendance,
+    getStudentName,
+    getSubjectName,
+    recordAttendance,
   };
 
   return (
