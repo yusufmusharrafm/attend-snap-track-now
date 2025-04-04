@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from "sonner";
 
-export type UserRole = 'student' | 'admin';
+export type UserRole = 'student' | 'faculty';
 
 export interface User {
   id: string;
@@ -12,6 +12,7 @@ export interface User {
   department?: string;
   deviceId?: string;
   verified: boolean;
+  photoUrl?: string;
 }
 
 interface AuthContextType {
@@ -21,7 +22,7 @@ interface AuthContextType {
   logout: () => void;
   verifyDevice: () => Promise<boolean>;
   isAuthenticated: boolean;
-  isAdmin: boolean;
+  isFaculty: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,10 +31,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const mockUsers: User[] = [
   {
     id: '1',
-    name: 'Admin User',
-    email: 'admin@college.edu',
-    role: 'admin',
-    verified: true
+    name: 'Faculty User',
+    email: 'faculty@college.edu',
+    role: 'faculty',
+    verified: true,
+    photoUrl: '/placeholder.svg'
   },
   {
     id: '2',
@@ -42,7 +44,8 @@ const mockUsers: User[] = [
     role: 'student',
     department: 'Computer Science',
     deviceId: '',
-    verified: false
+    verified: false,
+    photoUrl: '/placeholder.svg'
   }
 ];
 
@@ -126,7 +129,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         logout,
         verifyDevice,
         isAuthenticated: !!user,
-        isAdmin: user?.role === 'admin'
+        isFaculty: user?.role === 'faculty'
       }}
     >
       {children}

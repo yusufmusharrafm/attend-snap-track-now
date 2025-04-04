@@ -13,9 +13,10 @@ import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/student/DashboardPage";
 import AttendancePage from "./pages/student/AttendancePage";
 import ScanPage from "./pages/student/ScanPage";
-import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
-import DepartmentsPage from "./pages/admin/DepartmentsPage";
-import StudentsPage from "./pages/admin/StudentsPage";
+import FacultyDashboardPage from "./pages/faculty/FacultyDashboardPage";
+import DepartmentsPage from "./pages/faculty/DepartmentsPage";
+import StudentsPage from "./pages/faculty/StudentsPage";
+import ClassReportsPage from "./pages/faculty/ClassReportsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,10 +39,11 @@ const App = () => (
                 <Route path="/attendance" element={<AttendancePage />} />
                 <Route path="/scan" element={<ScanPage />} />
                 
-                {/* Admin Pages */}
-                <Route path="/admin" element={<AdminDashboardPage />} />
-                <Route path="/admin/departments" element={<DepartmentsPage />} />
-                <Route path="/admin/students" element={<StudentsPage />} />
+                {/* Faculty Pages */}
+                <Route path="/faculty" element={<FacultyDashboardPage />} />
+                <Route path="/faculty/departments" element={<DepartmentsPage />} />
+                <Route path="/faculty/students" element={<StudentsPage />} />
+                <Route path="/faculty/reports" element={<ClassReportsPage />} />
                 
                 {/* Catch-all route */}
                 <Route path="*" element={<NotFound />} />

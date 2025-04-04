@@ -10,14 +10,15 @@ import {
   Settings, 
   Users,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  FileText
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Sidebar = () => {
-  const { isAdmin } = useAuth();
+  const { isFaculty } = useAuth();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -29,16 +30,15 @@ const Sidebar = () => {
     { name: 'Settings', path: '/settings', icon: Settings }
   ];
 
-  const adminNavItems = [
-    { name: 'Dashboard', path: '/admin', icon: Home },
-    { name: 'Departments', path: '/admin/departments', icon: Book },
-    { name: 'Students', path: '/admin/students', icon: Users },
-    { name: 'Attendance', path: '/admin/attendance', icon: CalendarCheck },
-    { name: 'Reports', path: '/admin/reports', icon: BarChart3 },
-    { name: 'Settings', path: '/admin/settings', icon: Settings }
+  const facultyNavItems = [
+    { name: 'Dashboard', path: '/faculty', icon: Home },
+    { name: 'Departments', path: '/faculty/departments', icon: Book },
+    { name: 'Students', path: '/faculty/students', icon: Users },
+    { name: 'Class Reports', path: '/faculty/reports', icon: FileText },
+    { name: 'Settings', path: '/faculty/settings', icon: Settings }
   ];
 
-  const navItems = isAdmin ? adminNavItems : studentNavItems;
+  const navItems = isFaculty ? facultyNavItems : studentNavItems;
 
   return (
     <aside

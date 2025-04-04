@@ -13,6 +13,7 @@ export interface Student {
   email: string;
   departmentId: string;
   deviceId?: string;
+  photoUrl?: string;
 }
 
 export interface Subject {
@@ -60,10 +61,10 @@ const mockDepartments: Department[] = [
 ];
 
 const mockStudents: Student[] = [
-  { id: 's1', name: 'John Doe', email: 'john@student.edu', departmentId: 'd1' },
-  { id: 's2', name: 'Jane Smith', email: 'jane@student.edu', departmentId: 'd1' },
-  { id: 's3', name: 'Alice Johnson', email: 'alice@student.edu', departmentId: 'd2' },
-  { id: 's4', name: 'Bob Brown', email: 'bob@student.edu', departmentId: 'd3' }
+  { id: 's1', name: 'John Doe', email: 'john@student.edu', departmentId: 'd1', photoUrl: '/placeholder.svg' },
+  { id: 's2', name: 'Jane Smith', email: 'jane@student.edu', departmentId: 'd1', photoUrl: '/placeholder.svg' },
+  { id: 's3', name: 'Alice Johnson', email: 'alice@student.edu', departmentId: 'd2', photoUrl: '/placeholder.svg' },
+  { id: 's4', name: 'Bob Brown', email: 'bob@student.edu', departmentId: 'd3', photoUrl: '/placeholder.svg' }
 ];
 
 const mockSubjects: Subject[] = [
