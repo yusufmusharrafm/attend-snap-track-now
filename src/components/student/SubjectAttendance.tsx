@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import {
   Table,
@@ -36,8 +35,11 @@ const SubjectAttendance = () => {
   // Get all subjects for student's department
   const departmentSubjects = getDepartmentSubjects(user.department);
   
-  // Get student's attendance records
-  const allAttendanceRecords = getStudentAttendance(user.id);
+  // Get student's attendance records - fixing by adding start/end date parameters
+  // Using a date range that covers the entire semester for a comprehensive view
+  const startDate = '2025-01-01'; // Beginning of the semester
+  const endDate = '2025-12-31'; // End of the semester
+  const allAttendanceRecords = getStudentAttendance(user.id, startDate, endDate);
   
   // Filter records by selected subject
   const filteredRecords = selectedSubject === 'all'

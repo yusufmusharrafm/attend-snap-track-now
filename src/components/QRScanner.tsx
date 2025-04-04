@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -86,7 +85,7 @@ const QRScanner = () => {
       
       // Parse QR code data
       const data = JSON.parse(decodedText);
-      const { subjectId, period, expiry } = data;
+      const { subjectId, expiry } = data;
       
       // Check if QR code has expired
       const currentTime = new Date().getTime();
@@ -100,8 +99,8 @@ const QRScanner = () => {
       
       // Validate student can record attendance
       if (user && user.role === 'student' && user.verified) {
-        // Record attendance
-        recordAttendance(user.id, subjectId, period, isWifiConnected);
+        // Record attendance - fixing here by passing only the required 3 arguments
+        recordAttendance(user.id, subjectId, isWifiConnected);
         
         // Success message with WiFi status
         if (isWifiConnected) {
