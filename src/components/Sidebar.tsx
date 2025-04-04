@@ -11,14 +11,15 @@ import {
   Users,
   ChevronLeft,
   ChevronRight,
-  FileText
+  FileText,
+  ShieldCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Sidebar = () => {
-  const { isFaculty } = useAuth();
+  const { isFaculty, isAdmin } = useAuth();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -38,7 +39,20 @@ const Sidebar = () => {
     { name: 'Settings', path: '/faculty/settings', icon: Settings }
   ];
 
-  const navItems = isFaculty ? facultyNavItems : studentNavItems;
+  const adminNavItems = [
+    { name: 'Dashboard', path: '/admin', icon: Home },
+    { name: 'Departments', path: '/admin/departments', icon: Book },
+    { name: 'Students', path: '/admin/students', icon: Users },
+    { name: 'Settings', path: '/admin/settings', icon: Settings }
+  ];
+
+  // Determine which nav items to show based on user role
+  let navItems = studentNavItems;
+  if (isAdmin) {
+    navItems = adminNavItems;
+  } else if (isFaculty) {
+    navItems = facultyNavItems;
+  }
 
   return (
     <aside

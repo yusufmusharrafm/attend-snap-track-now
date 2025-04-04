@@ -1,7 +1,8 @@
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { toast } from "sonner";
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { toast } from 'sonner';
 
+// Types for our data
 export interface Department {
   id: string;
   name: string;
@@ -13,255 +14,165 @@ export interface Student {
   email: string;
   departmentId: string;
   deviceId?: string;
+  attendancePercentage?: number;
+  lastAttendance?: string;
   photoUrl?: string;
+}
+
+export interface Class {
+  id: string;
+  name: string;
+  departmentId: string;
+  subjects: Subject[];
 }
 
 export interface Subject {
   id: string;
   name: string;
-  departmentId: string;
+  code: string;
 }
 
-export interface AttendanceRecord {
-  id: string;
-  studentId: string;
-  subjectId: string;
-  date: string; // YYYY-MM-DD
-  period: number; // 1-8
-  present: boolean;
-  scannedAt?: string; // ISO date string
-  wifiVerified: boolean;
-}
-
+// Context type
 interface DataContextType {
   departments: Department[];
   students: Student[];
-  subjects: Subject[];
-  attendanceRecords: AttendanceRecord[];
+  classes: Class[];
   addDepartment: (department: Omit<Department, 'id'>) => void;
   addStudent: (student: Omit<Student, 'id'>) => void;
-  addSubject: (subject: Omit<Subject, 'id'>) => void;
-  recordAttendance: (studentId: string, subjectId: string, period: number, wifiVerified: boolean) => void;
-  getStudentAttendance: (studentId: string, startDate?: string, endDate?: string) => AttendanceRecord[];
-  getSubjectAttendance: (subjectId: string, date?: string) => AttendanceRecord[];
-  getDepartmentStudents: (departmentId: string) => Student[];
-  getDepartmentSubjects: (departmentId: string) => Subject[];
   getDepartmentName: (departmentId: string) => string;
-  getSubjectName: (subjectId: string) => string;
-  getStudentName: (studentId: string) => string;
+  getDepartmentStudents: (departmentId: string) => Student[];
 }
 
+// Create context
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
-// Mock data
-const mockDepartments: Department[] = [
-  { id: 'd1', name: 'Computer Science' },
-  { id: 'd2', name: 'Electrical Engineering' },
-  { id: 'd3', name: 'Mechanical Engineering' }
+// Initial mock data
+const initialDepartments: Department[] = [
+  { id: 'dept1', name: 'Computer Science' },
+  { id: 'dept2', name: 'Electronics' },
+  { id: 'dept3', name: 'Mechanical' },
 ];
 
-const mockStudents: Student[] = [
-  { id: 's1', name: 'John Doe', email: 'john@student.edu', departmentId: 'd1', photoUrl: '/placeholder.svg' },
-  { id: 's2', name: 'Jane Smith', email: 'jane@student.edu', departmentId: 'd1', photoUrl: '/placeholder.svg' },
-  { id: 's3', name: 'Alice Johnson', email: 'alice@student.edu', departmentId: 'd2', photoUrl: '/placeholder.svg' },
-  { id: 's4', name: 'Bob Brown', email: 'bob@student.edu', departmentId: 'd3', photoUrl: '/placeholder.svg' }
+const initialStudents: Student[] = [
+  {
+    id: 'stud1',
+    name: 'John Doe',
+    email: 'john@example.com',
+    departmentId: 'dept1',
+    attendancePercentage: 85,
+    lastAttendance: '2023-04-01',
+    photoUrl: '/placeholder.svg'
+  },
+  {
+    id: 'stud2',
+    name: 'Jane Smith',
+    email: 'jane@example.com',
+    departmentId: 'dept2',
+    attendancePercentage: 92,
+    lastAttendance: '2023-04-02',
+    photoUrl: '/placeholder.svg'
+  },
+  {
+    id: 'stud3',
+    name: 'Robert Johnson',
+    email: 'robert@example.com',
+    departmentId: 'dept1',
+    attendancePercentage: 78,
+    lastAttendance: '2023-03-28',
+    photoUrl: '/placeholder.svg'
+  },
 ];
 
-const mockSubjects: Subject[] = [
-  { id: 'sub1', name: 'Introduction to Programming', departmentId: 'd1' },
-  { id: 'sub2', name: 'Data Structures', departmentId: 'd1' },
-  { id: 'sub3', name: 'Circuit Theory', departmentId: 'd2' },
-  { id: 'sub4', name: 'Thermodynamics', departmentId: 'd3' }
-];
-
-// Generate some random attendance records for the last 7 days
-const generateMockAttendance = (): AttendanceRecord[] => {
-  const records: AttendanceRecord[] = [];
-  const today = new Date();
-  
-  for (let i = 0; i < 7; i++) {
-    const date = new Date(today);
-    date.setDate(date.getDate() - i);
-    const dateString = date.toISOString().split('T')[0];
-    
-    mockStudents.forEach(student => {
-      // Find subjects for this student's department
-      const deptSubjects = mockSubjects.filter(sub => sub.departmentId === student.departmentId);
-      
-      deptSubjects.forEach(subject => {
-        // Generate records for periods 1-8
-        for (let period = 1; period <= 8; period++) {
-          // Make some random attendance (70% chance of being present)
-          const present = Math.random() > 0.3;
-          records.push({
-            id: `ar-${student.id}-${subject.id}-${dateString}-${period}`,
-            studentId: student.id,
-            subjectId: subject.id,
-            date: dateString,
-            period,
-            present,
-            scannedAt: present ? new Date(date.setHours(8 + period)).toISOString() : undefined,
-            wifiVerified: present
-          });
-        }
-      });
-    });
+const initialClasses: Class[] = [
+  {
+    id: 'class1',
+    name: 'First Year CS',
+    departmentId: 'dept1',
+    subjects: [
+      { id: 'sub1', name: 'Introduction to Programming', code: 'CS101' },
+      { id: 'sub2', name: 'Data Structures', code: 'CS102' }
+    ]
+  },
+  {
+    id: 'class2',
+    name: 'Second Year CS',
+    departmentId: 'dept1',
+    subjects: [
+      { id: 'sub3', name: 'Algorithms', code: 'CS201' },
+      { id: 'sub4', name: 'Database Systems', code: 'CS202' }
+    ]
+  },
+  {
+    id: 'class3',
+    name: 'First Year Electronics',
+    departmentId: 'dept2',
+    subjects: [
+      { id: 'sub5', name: 'Circuit Theory', code: 'EC101' },
+      { id: 'sub6', name: 'Digital Electronics', code: 'EC102' }
+    ]
   }
-  
-  return records;
-};
+];
 
+// Provider component
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [departments, setDepartments] = useState<Department[]>(mockDepartments);
-  const [students, setStudents] = useState<Student[]>(mockStudents);
-  const [subjects, setSubjects] = useState<Subject[]>(mockSubjects);
-  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
+  const [departments, setDepartments] = useState<Department[]>(initialDepartments);
+  const [students, setStudents] = useState<Student[]>(initialStudents);
+  const [classes, setClasses] = useState<Class[]>(initialClasses);
 
-  // Initialize with mock data
-  useEffect(() => {
-    setAttendanceRecords(generateMockAttendance());
-  }, []);
-
+  // Add a new department
   const addDepartment = (department: Omit<Department, 'id'>) => {
     const newDepartment = {
-      id: `d${departments.length + 1}`,
-      ...department
+      ...department,
+      id: `dept${departments.length + 1}`,
     };
+    
     setDepartments([...departments, newDepartment]);
-    toast.success(`Department ${department.name} added`);
+    toast.success(`Department "${department.name}" added successfully`);
   };
 
+  // Add a new student
   const addStudent = (student: Omit<Student, 'id'>) => {
     const newStudent = {
-      id: `s${students.length + 1}`,
-      ...student
+      ...student,
+      id: `stud${students.length + 1}`,
+      attendancePercentage: 0,
+      lastAttendance: '',
+      photoUrl: '/placeholder.svg'
     };
+    
     setStudents([...students, newStudent]);
-    toast.success(`Student ${student.name} added`);
+    toast.success(`Student "${student.name}" added successfully`);
   };
 
-  const addSubject = (subject: Omit<Subject, 'id'>) => {
-    const newSubject = {
-      id: `sub${subjects.length + 1}`,
-      ...subject
-    };
-    setSubjects([...subjects, newSubject]);
-    toast.success(`Subject ${subject.name} added`);
-  };
-
-  const recordAttendance = (studentId: string, subjectId: string, period: number, wifiVerified: boolean) => {
-    const today = new Date().toISOString().split('T')[0];
-    const existingRecord = attendanceRecords.find(
-      r => r.studentId === studentId && 
-           r.subjectId === subjectId && 
-           r.date === today && 
-           r.period === period
-    );
-    
-    if (existingRecord) {
-      // Update existing record
-      const updatedRecords = attendanceRecords.map(record => {
-        if (record.id === existingRecord.id) {
-          return {
-            ...record,
-            present: true,
-            scannedAt: new Date().toISOString(),
-            wifiVerified
-          };
-        }
-        return record;
-      });
-      setAttendanceRecords(updatedRecords);
-    } else {
-      // Create new record
-      const newRecord: AttendanceRecord = {
-        id: `ar-${studentId}-${subjectId}-${today}-${period}`,
-        studentId,
-        subjectId,
-        date: today,
-        period,
-        present: true,
-        scannedAt: new Date().toISOString(),
-        wifiVerified
-      };
-      setAttendanceRecords([...attendanceRecords, newRecord]);
-    }
-    
-    toast.success('Attendance recorded successfully');
-  };
-
-  const getStudentAttendance = (studentId: string, startDate?: string, endDate?: string) => {
-    let filtered = attendanceRecords.filter(record => record.studentId === studentId);
-    
-    if (startDate) {
-      filtered = filtered.filter(record => record.date >= startDate);
-    }
-    
-    if (endDate) {
-      filtered = filtered.filter(record => record.date <= endDate);
-    }
-    
-    return filtered;
-  };
-
-  const getSubjectAttendance = (subjectId: string, date?: string) => {
-    let filtered = attendanceRecords.filter(record => record.subjectId === subjectId);
-    
-    if (date) {
-      filtered = filtered.filter(record => record.date === date);
-    }
-    
-    return filtered;
-  };
-
-  const getDepartmentStudents = (departmentId: string) => {
-    return students.filter(student => student.departmentId === departmentId);
-  };
-
-  const getDepartmentSubjects = (departmentId: string) => {
-    return subjects.filter(subject => subject.departmentId === departmentId);
-  };
-
-  const getDepartmentName = (departmentId: string) => {
-    const department = departments.find(dept => dept.id === departmentId);
+  // Helper to get department name by ID
+  const getDepartmentName = (departmentId: string): string => {
+    const department = departments.find(d => d.id === departmentId);
     return department ? department.name : 'Unknown Department';
   };
 
-  const getSubjectName = (subjectId: string) => {
-    const subject = subjects.find(sub => sub.id === subjectId);
-    return subject ? subject.name : 'Unknown Subject';
+  // Helper to get students by department ID
+  const getDepartmentStudents = (departmentId: string): Student[] => {
+    return students.filter(student => student.departmentId === departmentId);
   };
 
-  const getStudentName = (studentId: string) => {
-    const student = students.find(s => s.id === studentId);
-    return student ? student.name : 'Unknown Student';
+  const contextValue = {
+    departments,
+    students,
+    classes,
+    addDepartment,
+    addStudent,
+    getDepartmentName,
+    getDepartmentStudents,
   };
 
   return (
-    <DataContext.Provider
-      value={{
-        departments,
-        students,
-        subjects,
-        attendanceRecords,
-        addDepartment,
-        addStudent,
-        addSubject,
-        recordAttendance,
-        getStudentAttendance,
-        getSubjectAttendance,
-        getDepartmentStudents,
-        getDepartmentSubjects,
-        getDepartmentName,
-        getSubjectName,
-        getStudentName
-      }}
-    >
+    <DataContext.Provider value={contextValue}>
       {children}
     </DataContext.Provider>
   );
 };
 
+// Hook for using the data context
 export const useData = () => {
   const context = useContext(DataContext);
   if (context === undefined) {

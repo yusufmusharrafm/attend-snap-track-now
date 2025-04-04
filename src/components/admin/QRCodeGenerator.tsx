@@ -1,137 +1,136 @@
 
 import { useState } from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { QRCodeSVG } from 'qrcode.react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useData } from '@/contexts/DataContext';
-import QRGenerator from '@/components/QRCodeGenerator';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
 
 const AdminQRCodeGenerator = () => {
-  const { subjects, departments, getDepartmentSubjects } = useData();
-  const [selectedDepartment, setSelectedDepartment] = useState<string>('');
-  const [selectedSubject, setSelectedSubject] = useState<string>('');
-  const [selectedPeriod, setSelectedPeriod] = useState<string>('');
-  
-  // Get subjects for selected department
-  const departmentSubjects = selectedDepartment
-    ? getDepartmentSubjects(selectedDepartment)
-    : [];
-  
-  // Periods 1-8
-  const periods = Array.from({ length: 8 }, (_, i) => i + 1);
-  
+  const [qrValue, setQrValue] = useState('');
+  const [department, setDepartment] = useState('');
+  const [classId, setClassId] = useState('');
+  const [subjectId, setSubjectId] = useState('');
+  const [period, setPeriod] = useState('1');
+
+  const generateQRCode = () => {
+    if (!department || !classId || !subjectId || !period) {
+      toast.error('Please fill all fields');
+      return;
+    }
+
+    const data = {
+      department,
+      classId,
+      subjectId,
+      period,
+      timestamp: new Date().getTime(),
+    };
+    
+    setQrValue(JSON.stringify(data));
+    toast.success('QR Code generated successfully');
+  };
+
   return (
-    <div className="grid md:grid-cols-2 gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Generate QR Code</CardTitle>
-          <CardDescription>
-            Create a unique QR code for attendance
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Department</label>
-            <Select
-              value={selectedDepartment}
-              onValueChange={(value) => {
-                setSelectedDepartment(value);
-                setSelectedSubject('');
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Department" />
-              </SelectTrigger>
-              <SelectContent>
-                {departments.map(dept => (
-                  <SelectItem key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Generate Attendance QR Code</CardTitle>
+        <CardDescription>
+          Create a QR code that students can scan to mark attendance
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="department">Department</Label>
+              <Select
+                value={department}
+                onValueChange={setDepartment}
+              >
+                <SelectTrigger id="department">
+                  <SelectValue placeholder="Select Department" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cse">Computer Science</SelectItem>
+                  <SelectItem value="ece">Electronics</SelectItem>
+                  <SelectItem value="mech">Mechanical</SelectItem>
+                  <SelectItem value="civil">Civil</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="class">Class</Label>
+              <Select
+                value={classId}
+                onValueChange={setClassId}
+              >
+                <SelectTrigger id="class">
+                  <SelectValue placeholder="Select Class" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">First Year</SelectItem>
+                  <SelectItem value="2">Second Year</SelectItem>
+                  <SelectItem value="3">Third Year</SelectItem>
+                  <SelectItem value="4">Fourth Year</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="subject">Subject</Label>
+              <Input
+                id="subject"
+                placeholder="Subject Code"
+                value={subjectId}
+                onChange={(e) => setSubjectId(e.target.value)}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="period">Period</Label>
+              <Select
+                value={period}
+                onValueChange={setPeriod}
+              >
+                <SelectTrigger id="period">
+                  <SelectValue placeholder="Select Period" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                    <SelectItem key={num} value={num.toString()}>
+                      Period {num}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <Button onClick={generateQRCode} className="w-full">Generate QR Code</Button>
           </div>
           
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Subject</label>
-            <Select
-              value={selectedSubject}
-              onValueChange={setSelectedSubject}
-              disabled={!selectedDepartment}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={
-                  selectedDepartment 
-                    ? "Select Subject" 
-                    : "Select a department first"
-                } />
-              </SelectTrigger>
-              <SelectContent>
-                {departmentSubjects.map(subject => (
-                  <SelectItem key={subject.id} value={subject.id}>
-                    {subject.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex flex-col items-center justify-center">
+            {qrValue ? (
+              <div className="p-4 bg-white rounded-lg">
+                <QRCodeSVG
+                  value={qrValue}
+                  size={200}
+                  level="H"
+                  includeMargin
+                />
+              </div>
+            ) : (
+              <div className="p-10 border-2 border-dashed rounded-lg flex items-center justify-center text-muted-foreground">
+                QR Code will appear here
+              </div>
+            )}
           </div>
-          
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Period</label>
-            <Select
-              value={selectedPeriod}
-              onValueChange={setSelectedPeriod}
-              disabled={!selectedSubject}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={
-                  selectedSubject 
-                    ? "Select Period" 
-                    : "Select a subject first"
-                } />
-              </SelectTrigger>
-              <SelectContent>
-                {periods.map(period => (
-                  <SelectItem key={period} value={period.toString()}>
-                    Period {period}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-        <CardFooter>
-          <Button 
-            className="w-full"
-            disabled={!selectedDepartment || !selectedSubject || !selectedPeriod}
-          >
-            Display QR Code
-          </Button>
-        </CardFooter>
-      </Card>
-      
-      {selectedSubject && selectedPeriod && (
-        <div className="flex items-center justify-center">
-          <QRGenerator 
-            subjectId={selectedSubject} 
-            period={parseInt(selectedPeriod)} 
-          />
         </div>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 
