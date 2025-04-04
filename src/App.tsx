@@ -1,9 +1,21 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import { AuthProvider } from "./contexts/AuthContext";
+import { DataProvider } from "./contexts/DataContext";
+import MainLayout from "./components/MainLayout";
+
+// Pages
+import LoginPage from "./pages/LoginPage";
+import DashboardPage from "./pages/student/DashboardPage";
+import AttendancePage from "./pages/student/AttendancePage";
+import ScanPage from "./pages/student/ScanPage";
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import DepartmentsPage from "./pages/admin/DepartmentsPage";
+import StudentsPage from "./pages/admin/StudentsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -11,15 +23,33 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <DataProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <MainLayout>
+              <Routes>
+                {/* Auth Page */}
+                <Route path="/" element={<LoginPage />} />
+                
+                {/* Student Pages */}
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/attendance" element={<AttendancePage />} />
+                <Route path="/scan" element={<ScanPage />} />
+                
+                {/* Admin Pages */}
+                <Route path="/admin" element={<AdminDashboardPage />} />
+                <Route path="/admin/departments" element={<DepartmentsPage />} />
+                <Route path="/admin/students" element={<StudentsPage />} />
+                
+                {/* Catch-all route */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </MainLayout>
+          </BrowserRouter>
+        </DataProvider>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
