@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -13,11 +12,10 @@ interface AttendanceInfoProps {
 }
 
 const AttendanceInfo = ({ subjectId, presentCount, totalCount }: AttendanceInfoProps) => {
-  const { students, getStudentsBySubject } = useData();
+  const { getSubjectName } = useData();
   const [attendancePercentage, setAttendancePercentage] = useState(0);
   
   // Get subject name from context
-  const { getSubjectName } = useData();
   const subjectName = getSubjectName(subjectId);
   
   // Calculate attendance percentage

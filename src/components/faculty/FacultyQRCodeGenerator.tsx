@@ -180,7 +180,7 @@ const FacultyQRCodeGenerator = () => {
                 totalCount={totalStudents}
               />
               
-              <Alert variant="warning" className="mt-4">
+              <Alert variant="destructive" className="mt-4">
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
                   QR codes are valid for 45 seconds only. Students must scan while connected to campus WiFi.
