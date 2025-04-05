@@ -1,9 +1,11 @@
+
 import { useEffect, useState } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { useData } from '@/contexts/DataContext';
 import { CheckCircle, XCircle, Users } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface AttendanceInfoProps {
   subjectId: string;
@@ -14,6 +16,8 @@ interface AttendanceInfoProps {
 const AttendanceInfo = ({ subjectId, presentCount, totalCount }: AttendanceInfoProps) => {
   const { getSubjectName } = useData();
   const [attendancePercentage, setAttendancePercentage] = useState(0);
+  const [prevPresentCount, setPrevPresentCount] = useState(presentCount);
+  const { toast } = useToast();
   
   // Get subject name from context
   const subjectName = getSubjectName(subjectId);
@@ -37,6 +41,18 @@ const AttendanceInfo = ({ subjectId, presentCount, totalCount }: AttendanceInfoP
       return () => clearInterval(interval);
     }
   }, [presentCount, totalCount]);
+  
+  // Show toast notification when attendance changes
+  useEffect(() => {
+    if (presentCount > prevPresentCount) {
+      toast({
+        title: "New Attendance",
+        description: `${presentCount - prevPresentCount} new student(s) marked present for ${subjectName}`,
+        variant: "default",
+      });
+      setPrevPresentCount(presentCount);
+    }
+  }, [presentCount, prevPresentCount, subjectName, toast]);
   
   const absentCount = totalCount - presentCount;
   
