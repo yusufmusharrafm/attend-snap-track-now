@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 
 const FacultySettingsPage = () => {
   const { user, isAuthenticated, isFaculty } = useAuth();
@@ -15,6 +15,7 @@ const FacultySettingsPage = () => {
   const [pushNotifications, setPushNotifications] = useState(true);
   const [autoGenerateReports, setAutoGenerateReports] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const { toast } = useToast();
   
   // Check if user is authenticated
   if (!isAuthenticated) {
@@ -27,7 +28,10 @@ const FacultySettingsPage = () => {
   }
 
   const handleSavePreferences = () => {
-    toast.success("Settings saved successfully");
+    toast({
+      title: "Settings saved",
+      description: "Your preferences have been updated successfully",
+    });
   };
 
   return (
