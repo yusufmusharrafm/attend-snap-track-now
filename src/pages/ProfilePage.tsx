@@ -55,7 +55,7 @@ const ProfilePage = () => {
   // Mock faculty data (would come from a real API/database)
   const facultyInfo = {
     facultyId: user?.id || "N/A",
-    department: user?.department || getDepartmentName(user?.departmentId || ""),
+    department: user?.department || getDepartmentName(user?.department || ""),
     assignedSubjects: ["Data Structures", "Algorithms", "Database Systems"],
     email: user?.email || "faculty@example.com",
     phone: "+91 9876543210",
@@ -163,7 +163,7 @@ const ProfilePage = () => {
             <School className="h-4 w-4 text-muted-foreground" />
             <div>
               <p className="text-sm font-medium">Department</p>
-              <p className="text-sm text-muted-foreground">{user?.department || getDepartmentName(user?.departmentId || "")}</p>
+              <p className="text-sm text-muted-foreground">{user?.department || getDepartmentName(user?.department || "")}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
