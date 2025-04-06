@@ -1,18 +1,15 @@
 
 import { ReactNode } from 'react';
+import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import { useAuth } from '@/contexts/AuthContext';
 
-interface MainLayoutProps {
-  children: ReactNode;
-}
-
-const MainLayout = ({ children }: MainLayoutProps) => {
+const MainLayout = () => {
   const { isAuthenticated } = useAuth();
 
   if (!isAuthenticated) {
-    return <>{children}</>;
+    return <Outlet />;
   }
 
   return (
@@ -21,7 +18,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       <div className="flex-1 flex flex-col ml-16 md:ml-64">
         <Navbar />
         <main className="flex-1 p-4 md:p-6 overflow-auto">
-          {children}
+          <Outlet />
         </main>
       </div>
     </div>

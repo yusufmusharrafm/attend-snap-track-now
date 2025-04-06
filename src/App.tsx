@@ -37,11 +37,12 @@ const App = () => (
           <Toaster />
           <SonnerToaster />
           <BrowserRouter>
-            <MainLayout>
-              <Routes>
-                {/* Auth Page */}
-                <Route path="/" element={<LoginPage />} />
-                
+            <Routes>
+              {/* Auth Page */}
+              <Route path="/" element={<LoginPage />} />
+              
+              {/* All other pages wrapped with MainLayout */}
+              <Route element={<MainLayout />}>
                 {/* Common Pages */}
                 <Route path="/profile" element={<ProfilePage />} />
                 
@@ -64,11 +65,11 @@ const App = () => (
                 <Route path="/admin/departments" element={<AdminDepartmentsPage />} />
                 <Route path="/admin/students" element={<AdminStudentsPage />} />
                 <Route path="/admin/settings" element={<AdminSettingsPage />} />
-                
-                {/* Catch-all route */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </MainLayout>
+              </Route>
+              
+              {/* Catch-all route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
           </BrowserRouter>
         </DataProvider>
       </AuthProvider>
