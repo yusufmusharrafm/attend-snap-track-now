@@ -19,6 +19,7 @@ const DepartmentsTable = () => {
   const { departments, addDepartment, getDepartmentStudents } = useData();
   const [searchQuery, setSearchQuery] = useState('');
   const [newDepartmentName, setNewDepartmentName] = useState('');
+  const [newDepartmentCode, setNewDepartmentCode] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   
   // Filter departments based on search query
@@ -34,14 +35,30 @@ const DepartmentsTable = () => {
       return;
     }
     
+    if (!newDepartmentCode.trim()) {
+      toast.error('Department code cannot be empty');
+      return;
+    }
+    
     // Check if department already exists
     if (departments.some(dept => dept.name.toLowerCase() === newDepartmentName.toLowerCase())) {
       toast.error('Department with this name already exists');
       return;
     }
     
-    addDepartment({ name: newDepartmentName.trim() });
+    // Check if department code already exists
+    if (departments.some(dept => dept.code.toLowerCase() === newDepartmentCode.toLowerCase())) {
+      toast.error('Department with this code already exists');
+      return;
+    }
+    
+    addDepartment({ 
+      name: newDepartmentName.trim(),
+      code: newDepartmentCode.trim()
+    });
+    
     setNewDepartmentName('');
+    setNewDepartmentCode('');
     setIsAdding(false);
   };
   
@@ -66,14 +83,23 @@ const DepartmentsTable = () => {
       </div>
       
       {isAdding && (
-        <div className="flex items-center gap-2 p-4 rounded-md border bg-muted/50">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-2 p-4 rounded-md border bg-muted/50">
           <Input
             placeholder="Department name"
             value={newDepartmentName}
             onChange={(e) => setNewDepartmentName(e.target.value)}
+            className="flex-1"
           />
-          <Button onClick={handleAddDepartment}>Add</Button>
-          <Button variant="ghost" onClick={() => setIsAdding(false)}>Cancel</Button>
+          <Input
+            placeholder="Department code (e.g. CSE)"
+            value={newDepartmentCode}
+            onChange={(e) => setNewDepartmentCode(e.target.value)}
+            className="flex-1"
+          />
+          <div className="flex gap-2 w-full md:w-auto mt-2 md:mt-0">
+            <Button onClick={handleAddDepartment} className="flex-1 md:flex-initial">Add</Button>
+            <Button variant="ghost" onClick={() => setIsAdding(false)} className="flex-1 md:flex-initial">Cancel</Button>
+          </div>
         </div>
       )}
       
@@ -82,6 +108,7 @@ const DepartmentsTable = () => {
         <TableHeader>
           <TableRow>
             <TableHead>Department Name</TableHead>
+            <TableHead>Code</TableHead>
             <TableHead className="text-right">Students</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -94,6 +121,7 @@ const DepartmentsTable = () => {
               return (
                 <TableRow key={department.id}>
                   <TableCell className="font-medium">{department.name}</TableCell>
+                  <TableCell>{department.code}</TableCell>
                   <TableCell className="text-right">{studentCount}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="sm">View</Button>
@@ -104,7 +132,7 @@ const DepartmentsTable = () => {
             })
           ) : (
             <TableRow>
-              <TableCell colSpan={3} className="text-center py-4 text-muted-foreground">
+              <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
                 {searchQuery ? 'No departments found matching your search' : 'No departments added yet'}
               </TableCell>
             </TableRow>

@@ -37,7 +37,11 @@ const StudentsTable = () => {
   const [newStudent, setNewStudent] = useState({
     name: '',
     email: '',
-    departmentId: ''
+    departmentId: '',
+    rollNumber: '',
+    year: 1,
+    section: 'A',
+    phoneNumber: ''
   });
   
   // Filter students based on search query and selected department
@@ -54,7 +58,8 @@ const StudentsTable = () => {
   
   const handleAddStudent = () => {
     // Validate form
-    if (!newStudent.name.trim() || !newStudent.email.trim() || !newStudent.departmentId) {
+    if (!newStudent.name.trim() || !newStudent.email.trim() || !newStudent.departmentId || 
+        !newStudent.rollNumber.trim() || !newStudent.phoneNumber.trim()) {
       toast.error('All fields are required');
       return;
     }
@@ -72,6 +77,18 @@ const StudentsTable = () => {
       return;
     }
     
+    // Check if roll number already exists
+    if (students.some(s => s.rollNumber.toLowerCase() === newStudent.rollNumber.toLowerCase())) {
+      toast.error('A student with this roll number already exists');
+      return;
+    }
+    
+    // Validate phone number (simple validation)
+    if (!/^\+?[\d\s-]{10,15}$/.test(newStudent.phoneNumber)) {
+      toast.error('Please enter a valid phone number');
+      return;
+    }
+    
     // Add student
     addStudent(newStudent);
     
@@ -79,7 +96,11 @@ const StudentsTable = () => {
     setNewStudent({
       name: '',
       email: '',
-      departmentId: ''
+      departmentId: '',
+      rollNumber: '',
+      year: 1,
+      section: 'A',
+      phoneNumber: ''
     });
     setIsAdding(false);
   };
@@ -136,6 +157,11 @@ const StudentsTable = () => {
             value={newStudent.email}
             onChange={(e) => setNewStudent(prev => ({ ...prev, email: e.target.value }))}
           />
+          <Input
+            placeholder="Roll Number (e.g. CSE001)"
+            value={newStudent.rollNumber}
+            onChange={(e) => setNewStudent(prev => ({ ...prev, rollNumber: e.target.value }))}
+          />
           <Select
             value={newStudent.departmentId}
             onValueChange={(value) => setNewStudent(prev => ({ ...prev, departmentId: value }))}
@@ -151,6 +177,37 @@ const StudentsTable = () => {
               ))}
             </SelectContent>
           </Select>
+          <Select
+            value={String(newStudent.year)}
+            onValueChange={(value) => setNewStudent(prev => ({ ...prev, year: Number(value) }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Year" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1">1st Year</SelectItem>
+              <SelectItem value="2">2nd Year</SelectItem>
+              <SelectItem value="3">3rd Year</SelectItem>
+              <SelectItem value="4">4th Year</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
+            value={newStudent.section}
+            onValueChange={(value) => setNewStudent(prev => ({ ...prev, section: value }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Section" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="A">Section A</SelectItem>
+              <SelectItem value="B">Section B</SelectItem>
+            </SelectContent>
+          </Select>
+          <Input
+            placeholder="Phone Number (e.g. +91 9876543210)"
+            value={newStudent.phoneNumber}
+            onChange={(e) => setNewStudent(prev => ({ ...prev, phoneNumber: e.target.value }))}
+          />
           <div className="flex gap-2 md:col-span-3">
             <Button onClick={handleAddStudent}>Add Student</Button>
             <Button variant="ghost" onClick={() => setIsAdding(false)}>Cancel</Button>
@@ -163,8 +220,10 @@ const StudentsTable = () => {
         <TableHeader>
           <TableRow>
             <TableHead>Name</TableHead>
+            <TableHead>Roll Number</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Department</TableHead>
+            <TableHead>Year & Section</TableHead>
             <TableHead>Device Verified</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -174,8 +233,10 @@ const StudentsTable = () => {
             filteredStudents.map(student => (
               <TableRow key={student.id}>
                 <TableCell className="font-medium">{student.name}</TableCell>
+                <TableCell>{student.rollNumber}</TableCell>
                 <TableCell>{student.email}</TableCell>
                 <TableCell>{getDepartmentName(student.departmentId)}</TableCell>
+                <TableCell>Year {student.year}, Section {student.section}</TableCell>
                 <TableCell>
                   {student.deviceId ? (
                     <div className="flex items-center">
@@ -197,7 +258,7 @@ const StudentsTable = () => {
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">
+              <TableCell colSpan={7} className="text-center py-4 text-muted-foreground">
                 {searchQuery || selectedDepartment !== 'all'
                   ? 'No students found matching your search'
                   : 'No students added yet'}
