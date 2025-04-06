@@ -13,6 +13,10 @@ export interface User {
   deviceId?: string;
   verified: boolean;
   photoUrl?: string;
+  rollNumber?: string; // Added for students
+  year?: number; // Added for students
+  section?: string; // Added for students
+  phoneNumber?: string; // Added for students
 }
 
 interface AuthContextType {
@@ -35,6 +39,7 @@ const mockUsers: User[] = [
     name: 'Faculty User',
     email: 'faculty@college.edu',
     role: 'faculty',
+    department: 'dept1', // Computer Science
     verified: true,
     photoUrl: '/placeholder.svg'
   },
@@ -43,10 +48,14 @@ const mockUsers: User[] = [
     name: 'John Student',
     email: 'student@college.edu',
     role: 'student',
-    department: 'Computer Science',
+    department: 'dept1', // Computer Science
     deviceId: '',
     verified: false,
-    photoUrl: '/placeholder.svg'
+    photoUrl: '/placeholder.svg',
+    rollNumber: 'CSE123',
+    year: 3,
+    section: 'A',
+    phoneNumber: '+91 9876543210'
   },
   {
     id: '3',
@@ -110,10 +119,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     try {
       setIsLoading(true);
+      // In a real app, we would get device fingerprint, location, and WiFi info
+      
       // Generate a random device ID for demo
       const newDeviceId = Math.random().toString(36).substring(2, 15);
       
-      // In real app, this would get the actual device fingerprint
+      // In a real app, this would get the actual device fingerprint and verify with the server
       const updatedUser = { ...user, deviceId: newDeviceId, verified: true };
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));

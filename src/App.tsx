@@ -18,6 +18,7 @@ import FacultyDashboardPage from "./pages/faculty/FacultyDashboardPage";
 import DepartmentsPage from "./pages/faculty/DepartmentsPage";
 import StudentsPage from "./pages/faculty/StudentsPage";
 import ClassReportsPage from "./pages/faculty/ClassReportsPage";
+import TimetablePage from "./pages/faculty/TimetablePage";
 import FacultySettingsPage from "./pages/faculty/SettingsPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminDepartmentsPage from "./pages/admin/DepartmentsPage";
@@ -55,6 +56,7 @@ const App = () => (
                 <Route path="/faculty/departments" element={<DepartmentsPage />} />
                 <Route path="/faculty/students" element={<StudentsPage />} />
                 <Route path="/faculty/reports" element={<ClassReportsPage />} />
+                <Route path="/faculty/timetable" element={<TimetablePage />} />
                 <Route path="/faculty/settings" element={<FacultySettingsPage />} />
                 
                 {/* Admin Pages */}

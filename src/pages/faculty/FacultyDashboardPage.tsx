@@ -5,8 +5,9 @@ import FacultyStats from '@/components/faculty/FacultyStats';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import FacultyQRCodeGenerator from '@/components/faculty/FacultyQRCodeGenerator';
 import StudentPhotoGallery from '@/components/faculty/StudentPhotoGallery';
+import TimetableManager from '@/components/faculty/TimetableManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { QrCode, UserCheck, FileText } from 'lucide-react';
+import { QrCode, UserCheck, FileText, Calendar } from 'lucide-react';
 
 const FacultyDashboardPage = () => {
   const { user, isAuthenticated, isFaculty } = useAuth();
@@ -33,7 +34,7 @@ const FacultyDashboardPage = () => {
       <FacultyStats />
       
       <Tabs defaultValue="qrcode" className="space-y-5">
-        <TabsList className="grid grid-cols-3 gap-4 w-full max-w-md">
+        <TabsList className="grid grid-cols-4 gap-4 w-full max-w-md">
           <TabsTrigger value="qrcode" className="flex items-center gap-2">
             <QrCode className="h-4 w-4" />
             <span className="hidden sm:inline">QR Attendance</span>
@@ -44,10 +45,15 @@ const FacultyDashboardPage = () => {
             <span className="hidden sm:inline">Students</span>
             <span className="sm:hidden">List</span>
           </TabsTrigger>
+          <TabsTrigger value="timetable" className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            <span className="hidden sm:inline">Timetable</span>
+            <span className="sm:hidden">Time</span>
+          </TabsTrigger>
           <TabsTrigger value="reports" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
-            <span className="hidden sm:inline">Quick Reports</span>
-            <span className="sm:hidden">Reports</span>
+            <span className="hidden sm:inline">Reports</span>
+            <span className="sm:hidden">Rep</span>
           </TabsTrigger>
         </TabsList>
         
@@ -68,6 +74,16 @@ const FacultyDashboardPage = () => {
               View students in your class. Students highlighted in red are absent today.
             </p>
             <StudentPhotoGallery />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="timetable">
+          <div className="space-y-5">
+            <h2 className="text-xl font-semibold tracking-tight">Timetable Management</h2>
+            <p className="text-sm text-muted-foreground">
+              View and manage class timetables for each department and track scheduled subjects.
+            </p>
+            <TimetableManager />
           </div>
         </TabsContent>
         

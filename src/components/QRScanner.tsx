@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Camera, Wifi, WifiOff, MapPin, ShieldCheck } from 'lucide-react';
+import { Camera, Wifi, WifiOff, MapPin, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -150,7 +150,7 @@ const QRScanner = () => {
       
       // Parse QR code data
       const data = JSON.parse(decodedText);
-      const { subjectId, expiry, sessionId, token } = data;
+      const { subjectId, expiry, sessionId, token, period, facultyId } = data;
       
       // Check if QR code has expired
       const currentTime = new Date().getTime();
@@ -166,20 +166,26 @@ const QRScanner = () => {
         return;
       }
       
+      // Check if the user's device ID matches their registered device
+      if (user?.deviceId !== user?.id) {
+        toast.error('Device ID mismatch. Please use your registered device.');
+        return;
+      }
+      
       // Check WiFi connection
       const isWifiConnected = checkWifiConnection();
+      if (!isWifiConnected) {
+        toast.error('Please connect to the college WiFi to mark attendance.');
+        return;
+      }
       
       // Validate student can record attendance
       if (user && user.role === 'student' && user.verified) {
-        // Record attendance - fixing here by passing only the required 3 arguments
+        // Record attendance
         recordAttendance(user.id, subjectId, isWifiConnected);
         
-        // Success message with WiFi status
-        if (isWifiConnected) {
-          toast.success('Attendance recorded successfully!');
-        } else {
-          toast.warning('Attendance recorded, but WiFi verification failed. Please connect to college WiFi.');
-        }
+        // Success message
+        toast.success('Attendance recorded successfully!');
         
         // Stop scanner after successful scan
         stopScanner();
@@ -267,12 +273,35 @@ const QRScanner = () => {
           id="qr-reader" 
           className="w-full h-64 overflow-hidden rounded-md bg-muted"
         />
+        
+        {(!wifiConnected || !locationVerified || !user?.verified) && (
+          <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
+            <div className="flex gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0" />
+              <div>
+                <h4 className="text-sm font-medium">Cannot scan attendance</h4>
+                <ul className="mt-1 text-xs text-muted-foreground space-y-1">
+                  {!wifiConnected && (
+                    <li>• Not connected to college WiFi</li>
+                  )}
+                  {!locationVerified && (
+                    <li>• Location verification failed</li>
+                  )}
+                  {!user?.verified && (
+                    <li>• Device not registered for attendance</li>
+                  )}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
       </CardContent>
       <CardFooter className="flex flex-col gap-2">
         <Button 
           onClick={scanning ? stopScanner : startScanner} 
           className="w-full"
           variant={scanning ? "destructive" : "default"}
+          disabled={!wifiConnected || !locationVerified || !user?.verified}
         >
           <Camera className="h-4 w-4 mr-2" />
           {scanning ? 'Stop Scanner' : 'Start Scanner'}

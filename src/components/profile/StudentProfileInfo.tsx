@@ -10,7 +10,8 @@ import {
   Mail,
   Phone,
   Activity,
-  Key
+  Key,
+  User as UserIcon
 } from "lucide-react";
 import { useData } from "@/contexts/DataContext";
 
@@ -32,7 +33,7 @@ const StudentProfileInfo = ({ user, studentInfo }: StudentProfileInfoProps) => {
   
   return (
     <div className="w-full pt-4 border-t border-border">
-      <div className="grid grid-cols-1 gap-4 text-left">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
         <div className="flex items-center gap-2">
           <Key className="h-4 w-4 text-muted-foreground" />
           <div>
@@ -50,15 +51,26 @@ const StudentProfileInfo = ({ user, studentInfo }: StudentProfileInfoProps) => {
         <div className="flex items-center gap-2">
           <CalendarDays className="h-4 w-4 text-muted-foreground" />
           <div>
-            <p className="text-sm font-medium">Year & Section</p>
-            <p className="text-sm text-muted-foreground">{studentInfo.year}, Section {studentInfo.section}</p>
+            <p className="text-sm font-medium">Year</p>
+            <p className="text-sm text-muted-foreground">{studentInfo.year}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <UserIcon className="h-4 w-4 text-muted-foreground" />
+          <div>
+            <p className="text-sm font-medium">Section</p>
+            <p className="text-sm text-muted-foreground">Section {studentInfo.section}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Smartphone className="h-4 w-4 text-muted-foreground" />
           <div>
-            <p className="text-sm font-medium">Device ID</p>
-            <p className="text-sm text-muted-foreground">{studentInfo.deviceId}</p>
+            <p className="text-sm font-medium">Device Status</p>
+            <p className="text-sm text-muted-foreground">
+              {user?.verified ? 
+                (studentInfo.deviceId !== "Unverified" ? "Verified Device" : "Unverified") : 
+                "Unverified"}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
