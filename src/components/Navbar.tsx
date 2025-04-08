@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import { 
   Bell, 
   Menu, 
-  Search, 
   User,
   LogOut, 
   Settings
@@ -47,16 +46,7 @@ const Navbar = () => {
           </Button>
         </div>
         
-        <div className="hidden md:flex-1 md:flex md:items-center md:gap-4">
-          <div className="relative w-full max-w-sm">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <input
-              type="search"
-              placeholder="Search..."
-              className="h-9 w-full rounded-md border border-input bg-background pl-8 pr-4 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            />
-          </div>
-        </div>
+        <div className="flex-1"></div>
         
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" asChild className="relative">
