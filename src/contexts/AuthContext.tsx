@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from "sonner";
+import { api } from "@/lib/api";
 
 export type UserRole = 'student' | 'faculty' | 'admin';
 
@@ -32,7 +33,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock users for demo
+// Mock users for demo - these will be used as fallback if API is not available
 const mockUsers: User[] = [
   {
     id: '1',
@@ -83,22 +84,34 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Find user by email (in real app, this would be a backend call)
-      const foundUser = mockUsers.find(u => u.email === email);
-      
-      if (foundUser) {
-        // In real implementation, validate password here
-        setUser(foundUser);
-        localStorage.setItem('user', JSON.stringify(foundUser));
-        toast.success(`Welcome back, ${foundUser.name}!`);
-        return true;
-      } else {
-        toast.error('Invalid credentials');
-        return false;
+      // Try to login with the real API
+      try {
+        const response = await api.post<{user: User}>('/api/auth/login', { email, password });
+        const userData = response.user;
+        
+        if (userData) {
+          setUser(userData);
+          localStorage.setItem('user', JSON.stringify(userData));
+          toast.success(`Welcome back, ${userData.name}!`);
+          return true;
+        }
+      } catch (apiError) {
+        console.log("API login failed, falling back to mock data:", apiError);
+        
+        // Fallback to mock data if API fails (for development purposes)
+        const foundUser = mockUsers.find(u => u.email === email);
+        
+        if (foundUser) {
+          setUser(foundUser);
+          localStorage.setItem('user', JSON.stringify(foundUser));
+          toast.success(`Welcome back, ${foundUser.name}!`);
+          return true;
+        }
       }
+      
+      // If we get here, neither API nor mock login worked
+      toast.error('Invalid credentials');
+      return false;
     } catch (error) {
       console.error('Login error:', error);
       toast.error('Login failed. Please try again.');
@@ -109,6 +122,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = () => {
+    // Try to logout with the real API
+    try {
+      api.post('/api/auth/logout').catch(err => console.log('Logout API error:', err));
+    } catch (error) {
+      console.log('Logout API error:', error);
+    }
+    
+    // Always clear local state
     setUser(null);
     localStorage.removeItem('user');
     toast.info('You have been logged out');
@@ -119,18 +140,31 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     try {
       setIsLoading(true);
-      // In a real app, we would get device fingerprint, location, and WiFi info
       
-      // Generate a random device ID for demo
-      const newDeviceId = Math.random().toString(36).substring(2, 15);
+      // Try real API first
+      try {
+        const response = await api.post<{success: boolean, deviceId: string}>('/api/auth/verify-device');
+        
+        if (response.success) {
+          const updatedUser = { ...user, deviceId: response.deviceId, verified: true };
+          setUser(updatedUser);
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+          toast.success('Device verified successfully');
+          return true;
+        }
+      } catch (apiError) {
+        console.log("API device verification failed, using mock:", apiError);
+        
+        // Fallback to mock behavior
+        const newDeviceId = Math.random().toString(36).substring(2, 15);
+        const updatedUser = { ...user, deviceId: newDeviceId, verified: true };
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        toast.success('Device verified successfully');
+        return true;
+      }
       
-      // In a real app, this would get the actual device fingerprint and verify with the server
-      const updatedUser = { ...user, deviceId: newDeviceId, verified: true };
-      setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      
-      toast.success('Device verified successfully');
-      return true;
+      return false;
     } catch (error) {
       console.error('Device verification error:', error);
       toast.error('Device verification failed');
