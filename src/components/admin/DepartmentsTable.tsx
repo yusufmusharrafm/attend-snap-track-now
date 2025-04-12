@@ -13,10 +13,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search } from 'lucide-react';
 import { useData } from '@/contexts/DataContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 const DepartmentsTable = () => {
   const { departments, addDepartment, getDepartmentStudents } = useData();
+  const { canManageDepartments } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [newDepartmentName, setNewDepartmentName] = useState('');
   const [newDepartmentCode, setNewDepartmentCode] = useState('');
@@ -30,6 +32,11 @@ const DepartmentsTable = () => {
     : departments;
   
   const handleAddDepartment = () => {
+    if (!canManageDepartments) {
+      toast.error("You don't have permission to add departments");
+      return;
+    }
+
     if (!newDepartmentName.trim()) {
       toast.error('Department name cannot be empty');
       return;
@@ -76,13 +83,15 @@ const DepartmentsTable = () => {
           />
         </div>
         
-        <Button onClick={() => setIsAdding(!isAdding)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Department
-        </Button>
+        {canManageDepartments && (
+          <Button onClick={() => setIsAdding(!isAdding)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Department
+          </Button>
+        )}
       </div>
       
-      {isAdding && (
+      {isAdding && canManageDepartments && (
         <div className="flex flex-col md:flex-row items-start md:items-center gap-2 p-4 rounded-md border bg-muted/50">
           <Input
             placeholder="Department name"
@@ -125,7 +134,9 @@ const DepartmentsTable = () => {
                   <TableCell className="text-right">{studentCount}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="sm">View</Button>
-                    <Button variant="ghost" size="sm">Edit</Button>
+                    {canManageDepartments && (
+                      <Button variant="ghost" size="sm">Edit</Button>
+                    )}
                   </TableCell>
                 </TableRow>
               );

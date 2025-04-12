@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/select';
 import { Plus, Search, Check, X } from 'lucide-react';
 import { useData } from '@/contexts/DataContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 const StudentsTable = () => {
@@ -29,6 +30,9 @@ const StudentsTable = () => {
     addStudent, 
     getDepartmentName
   } = useData();
+  
+  const { canManageAllStudents, canManageFacultyStudents, user } = useAuth();
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
   const [isAdding, setIsAdding] = useState(false);
@@ -44,19 +48,32 @@ const StudentsTable = () => {
     phoneNumber: ''
   });
   
-  // Filter students based on search query and selected department
+  // Filter students based on search query, selected department, and user permissions
   const filteredStudents = students.filter(student => {
+    // Filter by search query
     const matchesSearch = searchQuery 
       ? student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         student.email.toLowerCase().includes(searchQuery.toLowerCase())
       : true;
     
+    // Filter by department
     const matchesDepartment = selectedDepartment === 'all' || student.departmentId === selectedDepartment;
     
-    return matchesSearch && matchesDepartment;
+    // Filter by user permissions
+    const hasPermission = canManageAllStudents || 
+      (canManageFacultyStudents && user?.department === student.departmentId);
+    
+    return matchesSearch && matchesDepartment && hasPermission;
   });
   
   const handleAddStudent = () => {
+    // Check permission
+    if (!canManageAllStudents && 
+        !(canManageFacultyStudents && user?.department === newStudent.departmentId)) {
+      toast.error("You don't have permission to add students to this department");
+      return;
+    }
+
     // Validate form
     if (!newStudent.name.trim() || !newStudent.email.trim() || !newStudent.departmentId || 
         !newStudent.rollNumber.trim() || !newStudent.phoneNumber.trim()) {
@@ -105,6 +122,11 @@ const StudentsTable = () => {
     setIsAdding(false);
   };
   
+  // Filter departments based on user permissions
+  const availableDepartments = departments.filter(dept => 
+    canManageAllStudents || (canManageFacultyStudents && user?.department === dept.id)
+  );
+  
   return (
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -138,13 +160,15 @@ const StudentsTable = () => {
           </Select>
         </div>
         
-        <Button onClick={() => setIsAdding(!isAdding)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Student
-        </Button>
+        {(canManageAllStudents || canManageFacultyStudents) && (
+          <Button onClick={() => setIsAdding(!isAdding)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Student
+          </Button>
+        )}
       </div>
       
-      {isAdding && (
+      {isAdding && (canManageAllStudents || canManageFacultyStudents) && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-md border bg-muted/50">
           <Input
             placeholder="Full Name"
@@ -170,7 +194,7 @@ const StudentsTable = () => {
               <SelectValue placeholder="Select Department" />
             </SelectTrigger>
             <SelectContent>
-              {departments.map(dept => (
+              {availableDepartments.map(dept => (
                 <SelectItem key={dept.id} value={dept.id}>
                   {dept.name}
                 </SelectItem>
@@ -252,7 +276,10 @@ const StudentsTable = () => {
                 </TableCell>
                 <TableCell className="text-right">
                   <Button variant="ghost" size="sm">View</Button>
-                  <Button variant="ghost" size="sm">Edit</Button>
+                  {(canManageAllStudents || 
+                    (canManageFacultyStudents && user?.department === student.departmentId)) && (
+                    <Button variant="ghost" size="sm">Edit</Button>
+                  )}
                 </TableCell>
               </TableRow>
             ))

@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from "sonner";
 import { api } from "@/lib/api";
@@ -29,6 +28,14 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isFaculty: boolean;
   isAdmin: boolean;
+  
+  // Add permission checks
+  canManageDepartments: boolean; // Can add/edit/delete departments
+  canManageAllStudents: boolean; // Can add/edit/delete any student
+  canManageFacultyStudents: boolean; // Can manage students in own department
+  canGenerateReports: boolean; // Can generate attendance reports
+  canGenerateQRCodes: boolean; // Can generate QR codes for attendance
+  canManageTimetable: boolean; // Can update timetable
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -174,6 +181,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  // Determine permissions based on user role
+  const isFaculty = user?.role === 'faculty';
+  const isAdmin = user?.role === 'admin';
+  
+  // Permission checks - could be more granular based on your specific requirements
+  const canManageDepartments = isAdmin; // Only admins can manage departments
+  const canManageAllStudents = isAdmin; // Only admins can manage all students
+  const canManageFacultyStudents = isFaculty || isAdmin; // Faculty can manage their department students, admins can manage all
+  const canGenerateReports = isFaculty || isAdmin; // Both can generate reports
+  const canGenerateQRCodes = isFaculty || isAdmin; // Both can generate QR codes
+  const canManageTimetable = isFaculty || isAdmin; // Both can manage timetable
+
   return (
     <AuthContext.Provider
       value={{
@@ -183,8 +202,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         logout,
         verifyDevice,
         isAuthenticated: !!user,
-        isFaculty: user?.role === 'faculty',
-        isAdmin: user?.role === 'admin'
+        isFaculty,
+        isAdmin,
+        canManageDepartments,
+        canManageAllStudents,
+        canManageFacultyStudents,
+        canGenerateReports,
+        canGenerateQRCodes,
+        canManageTimetable
       }}
     >
       {children}

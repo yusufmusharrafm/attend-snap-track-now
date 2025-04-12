@@ -12,14 +12,15 @@ import {
   ChevronLeft,
   ChevronRight,
   FileText,
-  ShieldCheck
+  ShieldCheck,
+  Building
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Sidebar = () => {
-  const { isFaculty, isAdmin } = useAuth();
+  const { isFaculty, isAdmin, canManageDepartments, canManageAllStudents } = useAuth();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -41,7 +42,7 @@ const Sidebar = () => {
 
   const adminNavItems = [
     { name: 'Dashboard', path: '/admin', icon: Home },
-    { name: 'Departments', path: '/admin/departments', icon: Book },
+    { name: 'Departments', path: '/admin/departments', icon: Building },
     { name: 'Students', path: '/admin/students', icon: Users },
     { name: 'Settings', path: '/admin/settings', icon: Settings }
   ];
@@ -109,6 +110,15 @@ const Sidebar = () => {
             })}
           </ul>
         </nav>
+
+        {isAdmin && !collapsed && (
+          <div className="px-4 py-2 mb-2">
+            <div className="flex items-center gap-2 text-xs font-medium text-sidebar-foreground/70">
+              <ShieldCheck className="h-4 w-4 text-orange-500" />
+              Admin Access
+            </div>
+          </div>
+        )}
 
         <div className="p-4 border-t border-sidebar-border">
           <div className={cn(
