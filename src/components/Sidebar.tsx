@@ -44,6 +44,7 @@ const Sidebar = () => {
     { name: 'Dashboard', path: '/admin', icon: Home },
     { name: 'Departments', path: '/admin/departments', icon: Building },
     { name: 'Students', path: '/admin/students', icon: Users },
+    { name: 'Reports', path: '/admin/reports', icon: BarChart3 },
     { name: 'Settings', path: '/admin/settings', icon: Settings }
   ];
 

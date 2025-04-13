@@ -24,6 +24,7 @@ import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminDepartmentsPage from "./pages/admin/DepartmentsPage";
 import AdminStudentsPage from "./pages/admin/StudentsPage";
 import AdminSettingsPage from "./pages/admin/SettingsPage";
+import AdminReportsPage from "./pages/admin/ReportsPage";
 import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
 
@@ -65,6 +66,7 @@ const App = () => (
                 <Route path="/admin/departments" element={<AdminDepartmentsPage />} />
                 <Route path="/admin/students" element={<AdminStudentsPage />} />
                 <Route path="/admin/settings" element={<AdminSettingsPage />} />
+                <Route path="/admin/reports" element={<AdminReportsPage />} />
               </Route>
               
               {/* Catch-all route */}

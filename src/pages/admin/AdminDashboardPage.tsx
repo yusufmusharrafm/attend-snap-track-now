@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import AdminQRCodeGenerator from '@/components/admin/QRCodeGenerator';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { Users, BookOpen, Settings } from 'lucide-react';
+import { Users, BookOpen, Settings, FileText } from 'lucide-react';
+import AttendanceAnalytics from '@/components/admin/AttendanceAnalytics';
 
 const AdminDashboardPage = () => {
   const { user, isAuthenticated, isAdmin } = useAuth();
@@ -40,6 +41,12 @@ const AdminDashboardPage = () => {
       description: "Configure system settings and user permissions",
       icon: <Settings className="h-8 w-8 text-purple-500" />,
       link: "/admin/settings"
+    },
+    {
+      title: "Reports",
+      description: "Generate and view attendance reports",
+      icon: <FileText className="h-8 w-8 text-orange-500" />,
+      link: "/admin/reports"
     }
   ];
 
@@ -55,8 +62,13 @@ const AdminDashboardPage = () => {
       <AdminStats />
       
       <div className="space-y-4">
+        <h2 className="text-xl font-semibold tracking-tight">Analytics Dashboard</h2>
+        <AttendanceAnalytics />
+      </div>
+      
+      <div className="space-y-4">
         <h2 className="text-xl font-semibold tracking-tight">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {adminActions.map((action, index) => (
             <Card key={index}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
